@@ -68,7 +68,6 @@ local function scrapeAPI()
     local success, response = pcall(function()
             return request({
             Url = "https://hostserver.porry.store/bloxfruit/bot/JobId/fullmoon",
-            Url = "https://hostserver.porry.store/bloxfruit/bot/JobId/mirage",
             Method = "GET"
         })
     end)
@@ -95,7 +94,6 @@ end
 
 sections.MainSection1:Header({
 	Name = "Full Moon Hopper"
-        Name = "Mirage Hopper"
 })
 
 local ChoosenID
