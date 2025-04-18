@@ -11,6 +11,25 @@ local Window = MacLib:Window({
     AcrylicBlur = true,
 })
 
+-- Tạo biến trạng thái để kiểm soát menu
+local menuVisible = true  -- Mặc định là menu hiển thị
+
+-- Hàm để ẩn/hiển thị menu
+local function toggleMenu()
+    if menuVisible then
+        Window:Hide()  -- Ẩn cửa sổ nếu menuVisible là true
+    else
+        Window:Show()  -- Hiển thị lại cửa sổ nếu menuVisible là false
+    end
+    menuVisible = not menuVisible  -- Đảo ngược trạng thái menu
+end
+
+-- Tạo nút Toggle Menu
+Window:Button({
+    Name = "Toggle Menu",  -- Nút bật/tắt menu
+    Callback = toggleMenu  -- Gọi hàm toggleMenu khi nhấn nút
+})
+
 local globalSettings = {
     UIBlurToggle = Window:GlobalSetting({
         Name = "UI Blur",
@@ -66,22 +85,14 @@ local sections = {
 local JobId, TS
 local function scrapeAPI()
     local success, response = pcall(function()
-        return request({
+            return request({
             Url = "https://hostserver.porry.store/bloxfruit/bot/JobId/fullmoon",
+            Url = "https://hostserver.porry.store/bloxfruit/bot/JobId/mirage",
             Method = "GET"
         })
     end)
 
-    if not success then
-        Window:Notify({
-            Title = Window.Settings.Title,
-            Description = "Error while scraping API: " .. response,
-            Lifetime = 5
-        })
-        return "Failed"
-    end
-
-    if response.Success then
+    if success and response.Success then
         local data = game.HttpService:JSONDecode(response.Body)
 
         if data.Amount and data.Amount > 0 then
@@ -95,26 +106,15 @@ local function scrapeAPI()
             
             TS = tick()
             return jobIds
-        else
-            Window:Notify({
-                Title = Window.Settings.Title,
-                Description = "No valid JobId found.",
-                Lifetime = 5
-            })
-            return "Failed"
         end
-    else
-        Window:Notify({
-            Title = Window.Settings.Title,
-            Description = "API response was not successful.",
-            Lifetime = 5
-        })
-        return "Failed"
     end
+    
+    return "Failed"
 end
 
 sections.MainSection1:Header({
     Name = "Full Moon Hopper"
+    Name = "Mirage Hopper"
 })
 
 local ChoosenID
@@ -193,6 +193,7 @@ sections.MainSection1:Button({
         end
     end
 })
+
 
 Dropdown = sections.MainSection1:Dropdown({
     Name = "Servers",
