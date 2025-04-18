@@ -95,7 +95,7 @@ end
 
 sections.MainSection1:Header({
 	Name = "Full Moon Hopper"
-  Name = "Mirage Hopper"
+        Name = "Mirage Hopper"
 })
 
 local ChoosenID
