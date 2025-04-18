@@ -1,78 +1,87 @@
 local MacLib = loadstring(game:HttpGet("https://github.com/biggaboy212/Maclib/releases/latest/download/maclib.txt"))()
 
 local Window = MacLib:Window({
-	Title = "Porry | https://discord.gg/R7S9tTh6Uy",
-	Subtitle = "Feel free to skid.",
-	Size = UDim2.fromOffset(630, 360),
-	DragStyle = 1,
-	DisabledWindowControls = {},
-	ShowUserInfo = true,
-	Keybind = Enum.KeyCode.RightControl,
-	AcrylicBlur = true,
+    Title = "Porry | https://discord.gg/R7S9tTh6Uy",
+    Subtitle = "Feel free to skid.",
+    Size = UDim2.fromOffset(630, 360),
+    DragStyle = 1,
+    DisabledWindowControls = {},
+    ShowUserInfo = true,
+    Keybind = Enum.KeyCode.RightControl,
+    AcrylicBlur = true,
 })
 
 local globalSettings = {
-	UIBlurToggle = Window:GlobalSetting({
-		Name = "UI Blur",
-		Default = Window:GetAcrylicBlurState(),
-		Callback = function(bool)
-			Window:SetAcrylicBlurState(bool)
-			Window:Notify({
-				Title = Window.Settings.Title,
-				Description = (bool and "Enabled" or "Disabled") .. " UI Blur",
-				Lifetime = 5
-			})
-		end,
-	}),
-	NotificationToggler = Window:GlobalSetting({
-		Name = "Notifications",
-		Default = Window:GetNotificationsState(),
-		Callback = function(bool)
-			Window:SetNotificationsState(bool)
-			Window:Notify({
-				Title = Window.Settings.Title,
-				Description = (bool and "Enabled" or "Disabled") .. " Notifications",
-				Lifetime = 5
-			})
-		end,
-	}),
-	ShowUserInfo = Window:GlobalSetting({
-		Name = "Show User Info",
-		Default = Window:GetUserInfoState(),
-		Callback = function(bool)
-			Window:SetUserInfoState(bool)
-			Window:Notify({
-				Title = Window.Settings.Title,
-				Description = (bool and "Showing" or "Redacted") .. " User Info",
-				Lifetime = 5
-			})
-		end,
-	})
+    UIBlurToggle = Window:GlobalSetting({
+        Name = "UI Blur",
+        Default = Window:GetAcrylicBlurState(),
+        Callback = function(bool)
+            Window:SetAcrylicBlurState(bool)
+            Window:Notify({
+                Title = Window.Settings.Title,
+                Description = (bool and "Enabled" or "Disabled") .. " UI Blur",
+                Lifetime = 5
+            })
+        end,
+    }),
+    NotificationToggler = Window:GlobalSetting({
+        Name = "Notifications",
+        Default = Window:GetNotificationsState(),
+        Callback = function(bool)
+            Window:SetNotificationsState(bool)
+            Window:Notify({
+                Title = Window.Settings.Title,
+                Description = (bool and "Enabled" or "Disabled") .. " Notifications",
+                Lifetime = 5
+            })
+        end,
+    }),
+    ShowUserInfo = Window:GlobalSetting({
+        Name = "Show User Info",
+        Default = Window:GetUserInfoState(),
+        Callback = function(bool)
+            Window:SetUserInfoState(bool)
+            Window:Notify({
+                Title = Window.Settings.Title,
+                Description = (bool and "Showing" or "Redacted") .. " User Info",
+                Lifetime = 5
+            })
+        end,
+    })
 }
 
 local tabGroups = {
-	TabGroup1 = Window:TabGroup()
+    TabGroup1 = Window:TabGroup()
 }
 
 local tabs = {
-	Main = tabGroups.TabGroup1:Tab({ Name = "Full Moon", Image = "rbxassetid://18821914323" })
+    Main = tabGroups.TabGroup1:Tab({ Name = "Full Moon", Image = "rbxassetid://18821914323" })
 }
 
 local sections = {
-	MainSection1 = tabs.Main:Section({ Side = "Left" }),
+    MainSection1 = tabs.Main:Section({ Side = "Left" }),
     MainSection2 = tabs.Main:Section({ Side = "Right" })
 }
 
 local JobId, TS
 local function scrapeAPI()
     local success, response = pcall(function()
-            return request({
+        return request({
             Url = "https://hostserver.porry.store/bloxfruit/bot/JobId/fullmoon",
             Method = "GET"
         })
     end)
 
-    if success and response.Success then
+    if not success then
+        Window:Notify({
+            Title = Window.Settings.Title,
+            Description = "Error while scraping API: " .. response,
+            Lifetime = 5
+        })
+        return "Failed"
+    end
+
+    if response.Success then
         local data = game.HttpService:JSONDecode(response.Body)
 
         if data.Amount and data.Amount > 0 then
@@ -86,14 +95,26 @@ local function scrapeAPI()
             
             TS = tick()
             return jobIds
+        else
+            Window:Notify({
+                Title = Window.Settings.Title,
+                Description = "No valid JobId found.",
+                Lifetime = 5
+            })
+            return "Failed"
         end
+    else
+        Window:Notify({
+            Title = Window.Settings.Title,
+            Description = "API response was not successful.",
+            Lifetime = 5
+        })
+        return "Failed"
     end
-    
-    return "Failed"
 end
 
 sections.MainSection1:Header({
-	Name = "Full Moon Hopper"
+    Name = "Full Moon Hopper"
 })
 
 local ChoosenID
@@ -122,8 +143,8 @@ sections.MainSection1:Button({
 })
 
 sections.MainSection1:Button({
-	Name = "Hop To Choosen Server",
-	Callback = function()
+    Name = "Hop To Choosen Server",
+    Callback = function()
         if tick() - TS <= 100 then
             return game:GetService("ReplicatedStorage").__ServerBrowser:InvokeServer("teleport", ChoosenID)
         end
@@ -151,7 +172,6 @@ sections.MainSection1:Button({
             }
         })
     end
-    
 })
 
 local Dropdown
@@ -174,40 +194,34 @@ sections.MainSection1:Button({
     end
 })
 
-
 Dropdown = sections.MainSection1:Dropdown({
-	Name = "Servers",
-	Multi = false,
-	Required = true,
-	Options = jobIds ~= "Failed" and jobIds or {},
-	Default = 1,
-	Callback = function(Value)
-		ChoosenID = Value
-	end,
+    Name = "Servers",
+    Multi = false,
+    Required = true,
+    Options = jobIds ~= "Failed" and jobIds or {},
+    Default = 1,
+    Callback = function(Value)
+        ChoosenID = Value
+    end,
 }, "Dropdown")
 
-
-
-
-
-
 sections.MainSection2:Paragraph({
-	Header = "cl",
-	Body = "vl v."
+    Header = "cl",
+    Body = "vl v."
 })
 
 sections.MainSection2:Label({
-	Text = "ngu"
+    Text = "ngu"
 })
 
 sections.MainSection2:SubLabel({
-	Text = "dog"
+    Text = "dog"
 })
 
 MacLib:SetFolder("MacLib")
 
 Window.onUnloaded(function()
-	print("Unloaded!")
+    print("Unloaded!")
 end)
 
 tabs.Main:Select()
