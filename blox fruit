@@ -55,13 +55,13 @@ local tabGroups = {
 }
 
 local tabs = {
-    Main = tabGroups.TabGroup1:Tab({ Name = "Full Moon", Image = "rbxassetid://18821914323" })
-    Main = tabGroups.TabGroup1:Tab({ Name = "Mirage", Image = "rbxassetid://18821914323" })
-    Main = tabGroups.TabGroup1:Tab({ Name = "Darkbeard", Image = "rbxassetid://18821914323" })
-    Main = tabGroups.TabGroup1:Tab({ Name = "Indra", Image = "rbxassetid://18821914323" })
-    Main = tabGroups.TabGroup1:Tab({ Name = "doughking", Image = "rbxassetid://18821914323" })
-    Main = tabGroups.TabGroup1:Tab({ Name = "haki color", Image = "rbxassetid://18821914323" })
-    Main = tabGroups.TabGroup1:Tab({ Name = "legendary sword", Image = "rbxassetid://18821914323" })
+    FullMoon = tabGroups.TabGroup1:Tab({ Name = "Full Moon", Image = "rbxassetid://18821914323" }),
+    Mirage = tabGroups.TabGroup1:Tab({ Name = "Mirage", Image = "rbxassetid://18821914323" }),
+    Darkbeard = tabGroups.TabGroup1:Tab({ Name = "Darkbeard", Image = "rbxassetid://18821914323" }),
+    Indra = tabGroups.TabGroup1:Tab({ Name = "Indra", Image = "rbxassetid://18821914323" }),
+    DoughKing = tabGroups.TabGroup1:Tab({ Name = "DoughKing", Image = "rbxassetid://18821914323" }),
+    HakiColor = tabGroups.TabGroup1:Tab({ Name = "Haki Color", Image = "rbxassetid://18821914323" }),
+    LegendarySword = tabGroups.TabGroup1:Tab({ Name = "Legendary Sword", Image = "rbxassetid://18821914323" }),
 }
 
 local sections = {
@@ -71,68 +71,82 @@ local sections = {
 
 local JobId, TS
 local function scrapeAPI()
-    local success, response = pcall(function()
-        return request({
-            Url = "https://hostserver.porry.store/bloxfruit/bot/JobId/fullmoon",
-            Url = "https://hostserver.porry.store/bloxfruit/bot/JobId/mirage",
-            Url = "https://hostserver.porry.store/bloxfruit/bot/JobId/darkbeard",
-            Url = "https://hostserver.porry.store/bloxfruit/bot/JobId/indra",
-            Url = "https://hostserver.porry.store/bloxfruit/bot/JobId/doughking",
-            Url = "https://hostserver.porry.store/CauTrom/HAKI_COLORS.php",
-            Url = "https://hostserver.porry.store/CauTrom/LEGENDARY_SWORD.php",
-            Method = "GET"
-        })
-    end)
+    local urls = {
+        "https://hostserver.porry.store/bloxfruit/bot/JobId/fullmoon",
+        "https://hostserver.porry.store/bloxfruit/bot/JobId/mirage",
+        "https://hostserver.porry.store/bloxfruit/bot/JobId/darkbeard",
+        "https://hostserver.porry.store/bloxfruit/bot/JobId/indra",
+        "https://hostserver.porry.store/bloxfruit/bot/JobId/doughking",
+        "https://hostserver.porry.store/CauTrom/HAKI_COLORS.php",
+        "https://hostserver.porry.store/CauTrom/LEGENDARY_SWORD.php"
+    }
 
-    if not success then
-        Window:Notify({
-            Title = Window.Settings.Title,
-            Description = "Error while scraping API: " .. response,
-            Lifetime = 5
-        })
-        return "Failed"
-    end
+    local jobIds = {}
+    local success, response
 
-    if response.Success then
-        local data = game.HttpService:JSONDecode(response.Body)
+    for _, url in ipairs(urls) do
+        success, response = pcall(function()
+            return request({
+                Url = url,
+                Method = "GET"
+            })
+        end)
 
-        if data.Amount and data.Amount > 0 then
-            local jobIds = {}
-
-            for _, job in ipairs(data.JobId) do
-                for jobId, _ in pairs(job) do
-                    table.insert(jobIds, jobId)
-                end
-            end
-            
-            TS = tick()
-            return jobIds
-        else
+        if not success then
             Window:Notify({
                 Title = Window.Settings.Title,
-                Description = "No valid JobId found.",
+                Description = "Error while scraping API from: " .. url .. " - " .. response,
                 Lifetime = 5
             })
             return "Failed"
         end
-    else
+
+        if response.Success then
+            local data = game.HttpService:JSONDecode(response.Body)
+
+            if data.Amount and data.Amount > 0 then
+                for _, job in ipairs(data.JobId) do
+                    for jobId, _ in pairs(job) do
+                        table.insert(jobIds, jobId)
+                    end
+                end
+            else
+                Window:Notify({
+                    Title = Window.Settings.Title,
+                    Description = "No valid JobId found in: " .. url,
+                    Lifetime = 5
+                })
+            end
+        else
+            Window:Notify({
+                Title = Window.Settings.Title,
+                Description = "API response from " .. url .. " was not successful.",
+                Lifetime = 5
+            })
+        end
+    end
+
+    if #jobIds == 0 then
         Window:Notify({
             Title = Window.Settings.Title,
-            Description = "API response was not successful.",
+            Description = "No valid JobIds found from any API.",
             Lifetime = 5
         })
         return "Failed"
     end
+
+    TS = tick()
+    return jobIds
 end
 
 sections.MainSection1:Header({
-    Name = "Full Moon Hopper"
-    Name = "mirage Hopper"
-    Name = "dark beard Hopper"
-    Name = "indra Hopper"
-    Name = "doughking Hopper"
-    Name = "haki color hopper"
-    Name = "sword Hopper"
+sections.MainSection1:Header({ Name = "Full Moon Hopper" })
+sections.MainSection1:Header({ Name = "Mirage Hopper" })
+sections.MainSection1:Header({ Name = "Darkbeard Hopper" })
+sections.MainSection1:Header({ Name = "Indra Hopper" })
+sections.MainSection1:Header({ Name = "DoughKing Hopper" })
+sections.MainSection1:Header({ Name = "Haki Color Hopper" })
+sections.MainSection1:Header({ Name = "Legendary Sword Hopper" })
 })
 
 local ChoosenID
