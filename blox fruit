@@ -65,8 +65,8 @@ local tabs = {
 }
 
 local sections = {
-    MainSection1 = tabs.Main:Section({ Side = "Left" }),
-    MainSection2 = tabs.Main:Section({ Side = "Right" })
+    MainSection1 = tabs.FullMoon:Section({ Side = "Left" }),
+    MainSection2 = tabs.FullMoon:Section({ Side = "Right" })
 }
 
 local JobId, TS
@@ -139,7 +139,6 @@ local function scrapeAPI()
     return jobIds
 end
 
-sections.MainSection1:Header({
 sections.MainSection1:Header({ Name = "Full Moon Hopper" })
 sections.MainSection1:Header({ Name = "Mirage Hopper" })
 sections.MainSection1:Header({ Name = "Darkbeard Hopper" })
@@ -147,7 +146,6 @@ sections.MainSection1:Header({ Name = "Indra Hopper" })
 sections.MainSection1:Header({ Name = "DoughKing Hopper" })
 sections.MainSection1:Header({ Name = "Haki Color Hopper" })
 sections.MainSection1:Header({ Name = "Legendary Sword Hopper" })
-})
 
 local ChoosenID
 local jobIds = scrapeAPI()
@@ -256,4 +254,4 @@ Window.onUnloaded(function()
     print("Unloaded!")
 end)
 
-tabs.Main:Select()
+tabs.FullMoon:Select()
